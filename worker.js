@@ -68,6 +68,6 @@ export default {
       }
     }
 
-    return new Response("AI website is running.");
+    return env.ASSETS.fetch(request);
   }
 };
