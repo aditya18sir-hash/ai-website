@@ -1,0 +1,12 @@
+
+{
+  "name": "ai-website",
+  "compatibility_date": "2026-10-16",
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "single-page-application"
+  },
+  "functions": {
+    "directory": "./functions"
+  }
+}
