@@ -118,7 +118,9 @@ form.addEventListener("submit",async event=>{
     reply.textContent=data.reply;
     status.textContent="Answer received";
   }catch(error){
-    reply.textContent="AI is not connected yet, or the free service is temporarily unavailable. Please try again later.";
+    
+reply.textContent="Error: "+error.message;
+
     status.textContent="Please try again";
   }finally{
     send.disabled=false;
