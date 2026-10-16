@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="AI - Your free AI assistant for learning, ideas and everyday questions.">
+<title>AI - Your Smart Assistant</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#101322;color:#f5f6ff;min-height:100vh}
+header{padding:20px 7%;border-bottom:1px solid #292d43;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:28px;font-weight:bold;color:#a78bfa}
+.tag{font-size:12px;border:1px solid #514477;border-radius:20px;padding:8px;color:#c4b5fd}
+main{max-width:800px;margin:65px auto;padding:18px}
+.hero{text-align:center}
+h1{font-size:clamp(36px,7vw,56px);margin-bottom:14px}
+h1 span{color:#a78bfa}
+.hero p{color:#aab0c8;line-height:1.7}
+.chat{margin-top:35px;background:#191d30;border:1px solid #343850;border-radius:20px;padding:18px}
+#messages{min-height:170px;max-height:420px;overflow-y:auto}
+.message{padding:13px;margin:10px 0;border-radius:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.ai{background:#22283d;margin-right:5%}
+.user{background:#302b50;margin-left:10%}
+.label{font-size:12px;color:#c4b5fd;margin-bottom:6px}
+textarea{width:100%;min-height:85px;resize:vertical;padding:14px;border:1px solid #414760;border-radius:12px;background:#101322;color:white;font:inherit}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+button{padding:12px 18px;border:0;border-radius:10px;background:#8b5cf6;color:white;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+#status{font-size:13px;color:#aab0c8}
+.examples{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.examples button{background:#1b2034;border:1px solid #343850;font-weight:normal}
+footer{text-align:center;padding:30px 15px;color:#9299b3;font-size:13px}
+@media(max-width:550px){main{margin:35px auto;padding:14px}.chat{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">✦ AI</div>
+  <div class="tag">FREE AI ASSISTANT</div>
+</header>
+<main>
+  <section class="hero">
+    <h1>Ask anything.<br><span>Explore everything.</span></h1>
+    <p>Your AI assistant for questions, learning, ideas and more.</p>
+  </section>
+  <section class="chat">
+    <div id="messages" aria-live="polite">
+      <div class="message ai">
+        <div class="label">AI ASSISTANT</div>
+        Hello! 👋 Welcome to AI. What would you like to know?
+      </div>
+    </div>
+    <form id="chatForm">
+      <label class="label" for="question">YOUR QUESTION</label>
+      <textarea id="question" maxlength="4000" placeholder="Type your question here..." required></textarea>
+      <div class="actions">
+        <span id="status">Ready to help</span>
+        <button id="send" type="submit">Ask AI ↗</button>
+      </div>
+    </form>
+  </section>
+  <div class="examples">
+    <button type="button" data-q="Explain photosynthesis in simple English.">📚 Learn something</button>
+    <button type="button" data-q="Give me five creative ideas.">💡 Get ideas</button>
+    <button type="button" data-q="Help me write a short story.">✍️ Write a story</button>
+  </div>
+</main>
+<footer>
+  AI may make mistakes. Check important information.<br><br>
+  © 2026 AI Assistant
+</footer>
+<script>
+const form=document.getElementById("chatForm");
+const question=document.getElementById("question");
+const messages=document.getElementById("messages");
+const send=document.getElementById("send");
+const status=document.getElementById("status");
+
+function addMessage(text,who){
+  const box=document.createElement("div");
+  box.className="message "+who;
+  const label=document.createElement("div");
+  label.className="label";
+  label.textContent=who==="user"?"YOU":"AI ASSISTANT";
+  const content=document.createElement("div");
+  content.textContent=text;
+  box.append(label,content);
+  messages.appendChild(box);
+  messages.scrollTop=messages.scrollHeight;
+  return content;
+}
+
+document.querySelectorAll("[data-q]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    question.value=button.dataset.q;
+    question.focus();
+  });
+});
+
+form.addEventListener("submit",async event=>{
+  event.preventDefault();
+  const prompt=question.value.trim();
+  if(!prompt||send.disabled)return;
+  addMessage(prompt,"user");
+  question.value="";
+  send.disabled=true;
+  status.textContent="Thinking...";
+  const reply=addMessage("Please wait...","ai");
+  try{
+    const response=await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message:prompt})
+    });
+    const data=await response.json();
+    if(!response.ok)throw new Error(data.error||"Request failed");
+    reply.textContent=data.reply;
+    status.textContent="Answer received";
+  }catch(error){
+    reply.textContent="AI is not connected yet, or the free service is temporarily unavailable. Please try again later.";
+    status.textContent="Please try again";
+  }finally{
+    send.disabled=false;
+  }
+});
+</script>
+</body>
+</html>
